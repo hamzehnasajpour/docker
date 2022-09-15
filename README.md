@@ -35,7 +35,7 @@ An approach to store some data of the container outside of the container. (In me
 
 ### 4. Commands
 
-* `docker volume creat myvol`
+* `docker volume create myvol`
 * `ls /var/lib/docker/volumes/ -la`
 ```
 total 36
@@ -59,3 +59,63 @@ local     myvol2
 
     in docker host: `ls /var/lib/docker/volumes/myvol`
 
+* `docker run -d -v /home:/data centos`
+sharing the `/home` of the docker host with container.
+
+* `docker volume ls -f name=m` # regex base
+```
+DRIVER    VOLUME NAME
+local     myvol
+local     myvol2
+local     myvol3
+```
+
+* `docker inspect myvol`
+```
+[
+    {
+        "CreatedAt": "2022-09-15T17:59:56+04:30",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/myvol/_data",
+        "Name": "myvol",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+* `docker run -it --name cent6 -v myvol:/data -v myvol2:/data2 centos`
+
+* `docker ps -a --filter volume=myvol2`
+```
+CONTAINER ID   IMAGE     COMMAND       CREATED              STATUS                      PORTS     NAMES
+5a25a8813c73   centos    "/bin/bash"   About a minute ago   Exited (0) 58 seconds ago             cent61
+96cb39ebf95a   centos    "/bin/bash"   2 minutes ago        Exited (0) 2 minutes ago              cent6
+```
+
+* `docker inspect --format="{{.Mounts}}" 354b9d691678`
+```
+[{volume myvol /var/lib/docker/volumes/myvol/_data /home local z true }]
+```
+
+* `docker volume create --driver local --opt type=nfs --opt o=addr=192.168.100.10,rw --opt device=:/myvolume/data myvol5`
+
+* `sudo docker inspect myvol5`
+```
+[
+    {
+        "CreatedAt": "2022-09-15T18:37:28+04:30",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/myvol5/_data",
+        "Name": "myvol5",
+        "Options": {
+            "device": ":/myvolume/data",
+            "o": "addr=192.168.100.10,rw",
+            "type": "nfs"
+        },
+        "Scope": "local"
+    }
+]
+```
