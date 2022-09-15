@@ -1,9 +1,127 @@
 # My Docker notes
 
+* `docker create centos`
 
-## Docker Logs
+## Docker `attach` and `exec`
+
+### `docker attach [OPTIONS] CONTAINER`
+
+* `docker attach myContainer` # connect to stdout/stdin/stderror of the main proccess
+
+### `docker exec [OPTIONS] CONTAINER COMMAND`
+
+* `docker exec -it myContainer /bin/bash`
+
+* `docker exec -it myContainer ls /home/`
+
+* `docker exec -it myContainer ping 8.8.8.8`
+
+* `docker exec -it -w /home myContainer ls`
+
+* `docker exec -it -e myvar=val1 myContainer bash`
+
+---
+
+## Default ENV variables
+
+`HOME`, `HOSTNAME`, `PATH` and `TERM`
+
+---
+
+## General commands
+
+### pull
+
+### create
+
+### run
+
+* `docker run -it -e myvar=val1 --name mycent centos:latest`
+* `docker run --rm ...` remove the container if the main proccess finished
+
+### tag
+
+* `docker tag image_id name`
+
+### inspect
+
+* `docker inspect Container`
+
+### cp
+
+* `docker cp file_src Container:/PATH`
+
+* `docker cp Container:/PATH dest`
+
+### stop
+
+* `docker stop [OPTIONS] CONTAINER [CONTAINER...]`
+
+* `docker stop -t 20 myContainer`
+
+### start
+
+* `docker start CONTAINER`
+
+* `docker start -a CONTAINER` # to having stdout/stderror
+
+* `docker start -i CONTAINER` # to having stding
 
 
+### restart
+
+* `docker restart CONTAINER`
+
+* `docker restart -t 20 myContainer`
+
+### Wait
+
+* `docker wait cent1` # wait until main proccess finished
+
+### kill
+
+* `docker kill [CONTAINER...]`
+
+### pause/unpause
+
+* `docker pause cent1`
+* `docker unpause cent1`
+
+### rename 
+
+* `docker rename mycent my_newcent`
+
+### commit
+
+* `docker commit container image:version` # create image from container
+
+**not recommended to create image via this approach. best practice is create image via docker file**
+
+* `docker commit --change='CMD ["/bin/sh"]' ...` # change the main process
+
+
+### save
+
+* `docker save -o mycentos.tar.gz mycentos:v1` # create an archive from image
+
+### load
+
+* `docker load -i archive.tar.gz`
+
+* `docker load < archive.tar.gz`
+
+---
+
+## Docker Logs/Events
+
+Events are related to docker host while the logs are related to containers.
+
+* `docker logs -ft mycent`
+
+* `docker events`
+* `docker events --since ...`
+* `docker events --until ...`
+* `docker events --filter ...`
 
 ---
 
@@ -118,4 +236,18 @@ CONTAINER ID   IMAGE     COMMAND       CREATED              STATUS              
         "Scope": "local"
     }
 ]
+```
+
+* `docker volume rm myvol3` if is not in used. (up or exit means in use)
+
+* `docker volume prune` : delete all unused volumes
+```
+WARNING! This will remove all local volumes not used by at least one container.
+Are you sure you want to continue? [y/N] y
+Deleted Volumes:
+myvol
+myvol2
+myvol3
+
+Total reclaimed space: 0B
 ```
