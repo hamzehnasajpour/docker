@@ -171,20 +171,7 @@ An approach to store some data of the container outside of the container. (In th
 * non-docker processes should not modify this path.
 * Best way to persist data in docker.
 
-
-### 2. bind mount
-
-An approach to store some data of the container outside of the container. (In the disk.)
-
-
-
-### 3. tmpfs
-
-An approach to store some data of the container outside of the container. (In memory: ram)
-
-
-
-### 4. Commands
+#### 4. Commands
 
 * `docker volume create myvol`
 * `ls /var/lib/docker/volumes/ -la`
@@ -236,7 +223,7 @@ local     myvol3
 ]
 ```
 
-* `docker run -it --name cent6 -v myvol:/data -v myvol2:/data2 centos`
+* `docker run -it --name cent6 -v myvol:/data -v myvol2:/data2:ro centos`
 
 * `docker ps -a --filter volume=myvol2`
 ```
@@ -284,3 +271,17 @@ myvol3
 
 Total reclaimed space: 0B
 ```
+
+### 2. bind mount
+
+An approach to store some data of the container outside of the container. (In the disk.)
+
+* `docker run -itd --name mycent --mount type=volume,source=myvol,target=/data centos:latest /bin/bash` == like `-v ...`
+
+* `docker run -itd --name mycent --read-only --mount type=bind,source=/mnt,target=/mnt centos:latest`
+
+**All paths are read-only except mount paths**
+
+### 3. tmpfs
+
+An approach to store some data of the container outside of the container. (In memory: ram)
