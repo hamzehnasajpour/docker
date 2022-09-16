@@ -100,15 +100,21 @@
 * `docker commit --change='CMD ["/bin/sh"]' ...` # change the main process
 
 
-### save
+### save/load
 
 * `docker save -o mycentos.tar.gz mycentos:v1` # create an archive from image
-
-### load
 
 * `docker load -i archive.tar.gz`
 
 * `docker load < archive.tar.gz`
+
+### export/import
+
+* `docker export mycent > mycent.tar` # create an image from container
+
+* `docker import mycent.tar`
+
+**dangle image** will be created --> `docker tag image_id tag:v`
 
 ---
 
@@ -122,6 +128,33 @@ Events are related to docker host while the logs are related to containers.
 * `docker events --since ...`
 * `docker events --until ...`
 * `docker events --filter ...`
+
+---
+
+## Docker Logging
+
+* `docker info --format '{{.LoggingDriver}}'`    
+by default `json-file`
+
+* you can change along the system `/etc/docker/daemon.json`
+```json
+{"log-driver": "syslog"}
+```
+* `log-opts`, `max-size`, `max-file`, `labels`,....
+
+* `docker run -it --log-driver logging_driver centos` # change the log driver per container
+
+* `ducker inspect -f '{{.HostConfig.LogConfig.Type}}' container`
+
+### Approches
+* blocking: direct delivery from container to driver (default)
+* non-blocking: store --> buffer --> send to driver
+
+`docker run -ot --log-opt mode=non-blocking --log-opt max-buffer-size=4m cents`
+
+### log location
+
+`/var/lib/docker/containers/e8e19.../e8e19...log`
 
 ---
 
