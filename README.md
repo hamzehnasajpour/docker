@@ -348,11 +348,29 @@ e7890d326fa5   none       null      local
 * **User defined bridges are better configurable**
 
 * `docker network connect localnet cent1`
+* `docker network connect --ip 192.168.100.50 localnet cent1`
 
 * `docker network disconnect localnet cent1`
 
 * `docker network create --subnet 192.168.100.0/24 mynet`
 
-* `docker network create --subnet 192.168.100.0/24 mynet1 --gateway 192.168.100.10`
+* `docker network create --subnet 192.168.100.0/24 --gateway 192.168.100.10 mynet1`
 
 * `docker run -itd --name cent2 --network mynet --ip 192.168.100.10 centos` # set static ip on container
+
+* `docker run -it --network host centos`
+
+### Port Mappings (Publishing)
+
+* `docker run -itd --name myhttp -p 5000:80 httpd`
+
+* `# docker port myhttp`
+```
+80/tcp -> 0.0.0.0:5000
+80/tcp -> :::5000
+```
+
+**docker automatically add rules to iptable. if not run these:**
+* sysctl net.ipv4.conf.all.forwarding=1
+* sudo iptables -P FORWARD ACCEPT
+
