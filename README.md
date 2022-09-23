@@ -285,3 +285,74 @@ An approach to store some data of the container outside of the container. (In th
 ### 3. tmpfs
 
 An approach to store some data of the container outside of the container. (In memory: ram)
+
+* to put in memory
+* secret
+* temporary (after each stop/start the data will be removed)
+
+* `docker run -itd --name mycent --tmpfs /tmp centos`
+
+* `docker run -itd --name mycent --mount type=tmpfs,destination=/tmp centos`
+
+---
+
+## Docker Network
+
+* `Container Network Model` - `CNM`    
+   Design spec (no implementeation)
+   - Sandboxes: isolated **network stack**, ethernet interfaces, ports, routing tables, dns and ...
+   - Endpoints: are virtual network interface like normal network interface for making connections.
+   - Networks: a software implementation of an 802.1d bridge (second layer switch = like a physical switch but virtual)
+
+* `libnetwork` (control and management)
+   network spec Implemented by GO
+
+* `Drivers` (data)
+  - bridge (single-host): default, for standalone container
+  - host: for standalone container - **remove network isolation**
+  - none or null
+  - overlay
+  - macvlan
+
+* `docker network ls`
+```bash
+NETWORK ID     NAME      DRIVER    SCOPE
+6b541beb5be4   bridge    bridge    local
+10b5ace57d61   host      host      local
+e7890d326fa5   none      null      local
+```
+
+* `docker network ls -f driver=bridge`
+
+* `docker network inspect bridge`
+
+* `docker inspect container` # check the NetworkSettings
+
+* `docker network create -d <driver> name`          
+  `docker network create -d bridge mynet`           
+  `docker network create mynet`
+
+  `docker network ls`
+```bash
+NETWORK ID     NAME       DRIVER    SCOPE
+6b541beb5be4   bridge     bridge    local  --> system bridge
+10b5ace57d61   host       host      local
+bf4f94333d00   localnet   bridge    local  --> user defined bridge
+e7890d326fa5   none       null      local
+```
+
+* `docker run -it --name cent4 --network localnet centos`
+
+* **In user defined bridge you have name resulotion but in the system bridge no**(`ping cent1`)   
+* **User defined bridges provide better isolation** since the system bridge is default.   
+* **User defined bridges are better configurable**
+
+* `docker network connect localnet cent1`
+
+* `docker network disconnect localnet cent1`
+
+* `docker network create --subnet 192.168.100.0/24 mynet`
+
+* `docker network create --subnet 192.168.100.0/24 mynet1 --gateway 192.168.100.10`
+
+* `docker run -itd --name cent2 --network mynet --ip 192.168.100.10 centos` # set static ip on container
