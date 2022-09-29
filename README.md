@@ -374,3 +374,100 @@ e7890d326fa5   none       null      local
 * sysctl net.ipv4.conf.all.forwarding=1
 * sudo iptables -P FORWARD ACCEPT
 
+---
+
+## Troubleshooting
+
+* `docker run -it --net container:<container_name> nicolaka/netshoot`
+
+* `docker run -it --net host nicolaka/netshoot` # host network troubleshooting
+
+**netshoot** is a powerful networking tshooting tools.
+
+Example:
+
+1. `docker run -itd --name mynginx -p 80:80 nginx`
+2. `docker run -it --network container:mynginx nicolaka/netshoot`
+
+```bash
+                    dP            dP                           dP   
+                    88            88                           88   
+88d888b. .d8888b. d8888P .d8888b. 88d888b. .d8888b. .d8888b. d8888P 
+88'  `88 88ooood8   88   Y8ooooo. 88'  `88 88'  `88 88'  `88   88   
+88    88 88.  ...   88         88 88    88 88.  .88 88.  .88   88   
+dP    dP `88888P'   dP   `88888P' dP    dP `88888P' `88888P'   dP   
+                                                                    
+Welcome to Netshoot! (github.com/nicolaka/netshoot)
+                                                                
+
+
+ 0e8c6a8befd1  ~  
+
+```
+
+Example 2:
+1. `docker run -itd --name perf-test-a --network perf-test nicolaka/netshoot iperf -s -p 9999`
+2. `docker run -itd --name perf-test-b --network perf-test nicolaka/netshoot iperf -c perf-test-a -p 9999`
+3. `docker logs perf-test-a`
+```bash
+------------------------------------------------------------
+Server listening on TCP port 9999
+TCP window size:  128 KByte (default)
+------------------------------------------------------------
+[  1] local 172.18.0.2 port 9999 connected with 172.18.0.3 port 44978
+[ ID] Interval       Transfer     Bandwidth
+[  1] 0.00-10.00 sec  44.1 GBytes  37.9 Gbits/sec
+```
+
+Example 3: (`nmap`)
+
+1. `docker run -itd --name mynginx -p 80:80 nginx`
+2. `docker run -it --privileged nicolaka/netshoot nmap -p 1-1024 -dd 172.17.0.2 | grep open`
+```bash
+Discovered open port 80/tcp on 172.17.0.2
+80/tcp   open   http                syn-ack ttl 64
+260/tcp  closed openport            reset ttl 64
+557/tcp  closed openvms-sysipc      reset ttl 64
+```
+
+**--privileged**: root access from this container to docker host. (**SECURITY ISSUE**)
+
+Example 4: (`iftop`)
+
+1. `docker run -itd --name mynginx -p 80:80 nginx`
+2. `docker run -it --network container:mynginx nicolaka/netshoot iftop -i eth0`
+
+Example 5: (`ctop`)
+
+1. `docker run -it --name cent1 centos` --> CTRL+D
+2. `docker run -it --name cent2 centos` --> CTRL+D
+3. `docker run -itd --name cent3 centos`
+4. `docker run -itd --name cent4 centos`
+5. `docker run -it -v /var/run/docker.sock:/var/run/docker.sock nicolaka/netshoot ctop`
+
+```bash
+  ctop - 19:15:31 UTC   5 containers                                                                                                                                                 
+
+     NAME                           CID          CPU                      MEM                      NET RX/TX                IO R/W                   PIDS UPTIME
+
+   ⏵ busy_faraday                   bfdb310a0f2a             0%                   12M / 12G        90B / 437B               0B / 0B                  13   0s                      
+   ⏵ cent3                          46333bb58b44             0%                   920K / 12G       3K / 437B                0B / 0B                  1    44s
+   ⏵ cent4                          2852b96dfcfb             0%                   936K / 12G       1K / 523B                0B / 0B                  1    38s
+   ⏹ cent1                          9acea9386209             -                        -            -                        -                        -    6s
+   ⏹ cent2                          fc426d40cb96             -                        -            -                        -                        -    0s
+   ```
+
+**-v** to access to the docker host service to see the container informations for using them by `ctop`.
+
+
+Example 5: (`termshark`)
+
+1. `docker run -itd --name mynginx -p 80:80 nginx`
+2. `docker run --rm --cap-add NET_ADMIN --cap-add CAP_NET_RAW -it --network  container:mynginx nicolaka/netshoot termshark -i eth0 tcp`
+
+
+Example 6: (`nc` - check firewall issue)
+
+1. `docker network create mynet`
+2. `docker run -itd --name mynginx -p 80:80 --network mynet nginx`
+3. `docker run -itd --name mynetcat --network mynet nicolaka/netshoot nc -vz mynginx 80`
