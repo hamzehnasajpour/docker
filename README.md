@@ -2,6 +2,8 @@
 
 * `docker create centos`
 
+* `docker run --it centos /bin/bash` : overwrite cmd
+
 ## Docker `attach` and `exec`
 
 ### `docker attach [OPTIONS] CONTAINER`
@@ -471,3 +473,78 @@ Example 6: (`nc` - check firewall issue)
 1. `docker network create mynet`
 2. `docker run -itd --name mynginx -p 80:80 --network mynet nginx`
 3. `docker run -itd --name mynetcat --network mynet nicolaka/netshoot nc -vz mynginx 80`
+
+---
+
+## Build Custom Docker Image
+
+* Docker file is a text file to build our image.
+* Build with `docker build` -> `image`
+
+### Instructions
+
+* `From` --> base image 
+  We can have multiple `From` --> multi stage image
+
+* `LABEL` --> meta data
+```
+LABEL description="...."
+LABEL version="v0.0.01"
+LABEL maintainer=""
+```
+
+**build image with same name and version --> overwrite the image and make old images as dongle --> run docker image prune**
+
+* `COPY` : copy file/folder from host to image    
+  `COPY test.txt /dir1`   
+  `COPY --chown=10:11 myfile* /dir2`
+
+* `ADD` : Like `COPY` but:
+  1. you can also use remote URL as file/folder
+  2. decompress and copy the archive files to image.
+
+**recommendation** is using `COPY` unless you need `ADD` extra features.
+
+
+* `RUN` : command execution    
+  1. shell form
+    `RUN <command>`
+
+  2. exec form
+    `RUN ["executable", "param1", "param2"]`
+
+**default shell is /bin/sh`**
+
+
+
+* `ENV` : define environment variables    
+  `ENV myvar=123`
+
+* `USER` : the next instruction will be run by this `USER`. Also container will be run by this `USER`.
+
+**recommendation** -> define `USER` and run for security.
+**It doesn't create user**
+
+* `WORKDIR` : the default path for next instruction is `WORKDIR` and the container will be entered to this path.
+
+* `VOLUME` : documentation    
+  `VOLUME /myvol1 or ["vol1", "vol2"]`
+
+* `EXPOSE` : documentation    
+  `EXPOSE <port> [<port>/<protocol>]`    
+  `EXPOSE 80/tcp`
+
+* `CMD` : main process     
+  `CMD command param1 param2`    : shell form
+  `CMD ["executable","param1","param2"]`    : exec form   
+  `CMD ["param1", "param2"]` : exec form (pass these to `ENTRYPOINT`)
+
+
+* `ENTRYPOINY` : like `CMD`   
+  
+**to overwrite in run you can pass `--entrypoint ...`**
+
+* you can both `CMD` and `ENTRYPOINT`, or one of them.
+* if you have both of them, both should be as `exec form` and `CMD` is as arguments.
+* you can have multiple `CMD` but the main process is the  latest `CMD`.
+* default `ENTRYPOINT` is `/bin/sh -c`.
