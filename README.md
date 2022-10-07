@@ -4,6 +4,11 @@
 
 * `docker run --it centos /bin/bash` : overwrite cmd
 
+## Docker `history`
+
+History of created images: `docker history centos`
+
+
 ## Docker `attach` and `exec`
 
 ### `docker attach [OPTIONS] CONTAINER`
@@ -548,3 +553,48 @@ LABEL maintainer=""
 * if you have both of them, both should be as `exec form` and `CMD` is as arguments.
 * you can have multiple `CMD` but the main process is the  latest `CMD`.
 * default `ENTRYPOINT` is `/bin/sh -c`.
+
+* `SHELL` : changing the shell (default is `/bin/bash`)
+
+* `HEALTHCHECK` : tells Docker how to test a container to check that it is still working or not.
+  `HEALTHCHECK (options) CMD ...`
+  `--interval==DURATION (default 30s)`
+  `--timeout==DURATION (default 30s)`
+  `--start-period==DURATION (default 30s)`
+  `--retries=N (default:3)`
+
+  - `docker inspect ...` --> set the `Health` in the response.
+
+## Docker Image improvement
+
+### Areas of improvements
+
+* build time: moving the general commands/lines to above the docker file
+* image size
+* Maintainablity
+* Security
+* Consistency/Repetablity
+
+## Restart Policy
+
+`docker run -it --name mycent --restart [flag] centos:lates`
+
+* `flag`
+ - `no` : do not restart automatically. (DEFAULT)
+ - `on-failure`: restart with exit code non zero.
+ - `always` : Always
+ - `unless-stopped` : similar to always except that when we stop the container.
+
+
+## Docker Registery
+
+### run a local registery:
+`docker run -d -p 5000:5000 --restart=always --name registry registry:2`
+
+### copy to local registery
+```
+docker pull centos:latest
+docker tag centos:latest localhost:5000/my-centos
+docker push localhost:5000/my-centos
+```
+
