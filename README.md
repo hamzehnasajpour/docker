@@ -598,3 +598,99 @@ docker tag centos:latest localhost:5000/my-centos
 docker push localhost:5000/my-centos
 ```
 
+### WEB Registery
+`docker run -d -p 8080:8080 --restart always --name registry-web --link registry -e REGISTRY_URL=http://registry:5000/v2 -e REGISTRY_NAME=localhost:5000 hyper/docker-registry-web`
+
+
+## Docker Compose
+* `yaml`
+* default name: `docker-compose.yml`
+
+### Install
+
+```
+yum update -y nss curl libcurl
+```
+```
+curl -SL https://github.com/docker/compose/releases/download/v2.11.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+```
+```
+chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+```
+
+### Deploying
+
+`mkdir counter-app-compose`
+`cd counter-app-compose`
+`nano docker-compose.yml`
+```docker
+version: '3'
+services:
+        web:
+                build: .
+                ports:
+                 - "5000:5000"
+        redis:
+                image: "redis:alpine"
+```
+
+`nano Dockerfile`
+```docker
+FROM python:3.7-alpine
+WORKDIR /code
+ENV FLASK_APP app.py
+ENV FLASK_RUN_HOST 0.0.0.0
+RUN apk add --no-cache gcc musl-dev linux-headers
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["flask", "run"]
+```
+
+`nano requirements.txt`
+```
+flask
+redis
+```
+
+`nano app.py`
+```python
+import time
+import redis
+from flask import Flask
+app = Flask(__name__)
+cache = redis.Redis(host='redis', port=6379)
+def get_hit_count():
+    retries = 5
+    while True:
+        try:
+            return cache.incr('hits')
+        except redis.exceptions.ConnectionError as exc:
+            if retries == 0:
+                raise exc
+            retries -= 1
+            time.sleep(0.5)
+@app.route('/')
+def hello():
+    count = get_hit_count()
+    return 'Hello World! I have been seen {} times.\n'.format(count)
+```
+
+* `docker-compose up` $ create network and start the container
+* `docker-compose up -d`
+
+**run in the compose directory**
+
+* `docker-compose ps` 
+* `docker-compose images`
+* `docker-compose top`
+* `docker-compose stop`
+* `docker-compose start`
+* `docker-compose restart`
+* `docker-compose down` # stop, remove and remove network(bridge)
+* `docker-compose -v` # stop, remove, remove network and remove volumes
+* `docker-compose config` # parse the docker-compose.yml to check error
+* `docker-compose pause`
+* `docker-compose logs` / `docker-compose logs -ft`
+
