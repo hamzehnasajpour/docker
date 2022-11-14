@@ -1,5 +1,51 @@
 # My Docker notes
 
+## DevOps
+
+DevOps is a culture, movement or practice that emphasizes the collaboration and communication of both software developers and other IT professionals while automating the process of software delivery and ingrastructure changes.
+
+### CI: more related to developers
+CI is a software development practice which frequently refers to integrating, building and testing code within the development environment.
+
+Benefits:
+* if you are going fail, then fail early.
+* Increases confidence in the software.
+* Team communication.
+* Risk mitigation.
+
+### CD: 
+
+Benefits:
+* Time reduction
+
+### Why automation?
+* Tasks in code.
+* Collaboration.
+* Eliminate errors.
+* write once.
+
+### CI/CD benefits
+* Easy to debug and change.
+* release and delivery speed increases.
+* increased code quality.
+* reduces the cost.
+* increased flexibility.
+
+---
+
+## General commands
+
+* `docker --version`
+* `docker version`
+* `docker info`
+
+* `docker pull hello-world`
+* `docker images`
+* `docker images -a`
+* `docker run hello-world`
+* `docker ps`
+* `docker ps -a`
+
 * `docker create centos`
 
 * `docker run --it centos /bin/bash` : overwrite cmd
@@ -32,14 +78,6 @@ History of created images: `docker history centos`
 ## Default ENV variables
 
 `HOME`, `HOSTNAME`, `PATH` and `TERM`
-
----
-
-## General commands
-
-### pull
-
-### create
 
 ### run
 
